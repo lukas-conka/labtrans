@@ -6,7 +6,6 @@
 <div class="container">
 
     <div class="menu">
-      
             <div class="box">
               <span class="flag flag1">1</span>
               <p>Insira ou busque <br>uma nova imagem<br>( passo 2 )</p>
@@ -22,7 +21,7 @@
               </div>
             <div class="box">
                 <span class="flag flag2">2</span>
-                  <p>O sistema trata uma <br> imagem pendente<br> de analise</p>
+                  <p>O sistema trará uma <br> imagem pendente<br> de analise</p>
                   <br>
                   <button class="btn btn2" v-on:click="search">Buscar imagem</button>
                 </div>
@@ -33,6 +32,38 @@
                   <button class="btn btn3" v-on:click="onAnalyze">Analisar</button>
             </div>
     </div>
+    <div id="carregando"></div>
+    <div class="container-items" id="container-items">
+        <ul>
+          <li v-for="(item, index) in items">
+            <form @submit="validar($event)">
+              <div>
+                  <button  type="submit">Validar</button>
+                </div>
+                <input type="hidden" id="id"  name="id" :value="index"></input>
+
+                <div>
+                  <label for="description">Item:</label> 
+                  <input type="text" id="description"  name="description" :value="item.description"></input>
+                </div>
+                <div>
+                  <label for="color">Cor:</label> 
+                  <input type="text" id="color" name="color" :value="item.color" disabled></input>
+                </div>
+                <div>
+                  <label for="name">X:</label>  
+                  <input type="text"  id="x" name="x" :value="item.x" disabled></input>
+                </div>
+                <div>
+                  <label for="y">Y:</label>  
+                  <input type="text" id="y" name="y" :value="item.y" disabled></input>
+                </div>
+              
+            </form>
+
+          </li> 
+      </ul> 
+</div>
 
        <div class="processing">
           <img id="image" class="image" />
@@ -42,25 +73,7 @@
 
 </div>
 
- 
 
-
-<div class="container-items" id="container-items">
-        <ul>
-          <li v-for="(item, index) in items">
-            <form @submit="validar($event)">
-            id: <input type="hidden" id="id"  name="id" :value="index"></input>
-
-            Item: <input type="text" id="description"  name="description" :value="item.description"></input>
-            Cor:<input type="text" id="color" name="color" :value="item.color"></input>
-            X: <input type="text"  id="x" name="x" :value="item.x"></input>
-            Y: <input type="text" id="y" name="y" :value="item.y"></input>
-            <button  type="submit">Validar</button>
-              </form>
-
-          </li> 
-      </ul> 
-</div>
 
 </div>
 </template>
@@ -69,6 +82,8 @@ import * as cocoSsd from '@tensorflow-models/coco-ssd'
 import * as tf from '@tensorflow/tfjs';
 import api from '../services/api'
 import colors from '../utils/colors.json'
+
+const gif = require('../assets/loader.gif');
 
 const itemsAnalyzed = []
 
@@ -129,7 +144,7 @@ async function colorsFiltred() {
 
 async function render(data){
 
-document.getElementById('canvas').style.display = "block";
+  document.getElementById('canvas').style.display = "block";
 
  const colors = await colorsFiltred();
 
@@ -216,15 +231,12 @@ export default {
 
 
     this.items.splice(e.target.id.value, 1);
-  
-  
-    console.log('os items', this.items)
-
 
     try{
 
       const result = await api.post('/imagemxitem', data);
       console.log(result)
+      alert('Item salvo com sucesso.')
 
     }catch(err){
       console.log(err)
@@ -259,6 +271,10 @@ export default {
     },
     async onAnalyze(){
 
+      const carregando = document.querySelector('#carregando');
+
+      carregando.innerHTML = `<img src="${gif}" width="150" height="150">`;
+
         cocoSsd.load()
         .then(model => model.detect(image))
         .then(predictions => {
@@ -266,7 +282,9 @@ export default {
           this.listItems(predictions)
           document.getElementById("image").style.display = "none";
           document.getElementById("canvas").style.display = "block";
-          //this.items = [];
+
+          carregando.innerHTML = 'Imagem analisada. <br/> Valide os items abaixo, você também pode alterar o nome do item.';
+          
 
         })
       },
@@ -284,6 +302,8 @@ export default {
         formData.append('path', this.selectedFile.name)
 
         try{
+          alert('Imagem cadastrada com sucesso. Agora clique em Buscar Imagem.')
+
           const result = await api.post('/imagens', formData);
           console.log(result);
 
@@ -303,6 +323,12 @@ export default {
   max-width:1000px;
   margin: 0 auto;
 
+}
+#carregando{
+  margin-top:20px;
+  font-size: 20px;
+  color: purple;
+  text-align: center;
 }
 .menu{
   display: flex;
@@ -337,6 +363,7 @@ export default {
 }
 
 .processing{
+  display:flex;
   max-height: 900px;
   background:  #ffffff;
   border-radius: 8px;
@@ -344,14 +371,34 @@ export default {
   justify-content: center;
   align-items: center;
   margin-top: 50px;
+  text-align:center;
+  
 
 }
 .container-items{
-  display:flex;
-  background:  #ffffff;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
+  display: flex;
+  margin-top: 20px;
+  width:1000px;
+  margin: 0 auto;
+  margin-top: 30px;
+    justify-content: center;
+
+
+}
+
+.container-items  input{
+  display:block;
+  padding:10px;
+}
+
+.container-items  button{
+  padding:10px;
+  width:100%;
+  font-weight: bold;
+  font-size: 16px;
+  cursor:pointer; 
+  background:tomato;
+  color: #fff;
 }
 
 .container-items li header{
@@ -367,13 +414,12 @@ export default {
 }
 .container-items ul{
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  gap: 20px;
-
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
 }
 .container-items li{
-  border: 2px solid #6fc3df;
-  background: #1c2b34;
+display:block;
+  background: #fd970f;
   padding: 10px;
   color: #fff;
 }
@@ -384,6 +430,7 @@ export default {
   justify-content: center;
   align-items: center;
   text-align:center;
+  display:flex;
 }
 
 
@@ -422,7 +469,6 @@ export default {
 .fileContainer [type=file] {
     cursor: pointer;
     display: block;
-
     filter: alpha(opacity=0);
     min-height: 100%;
     min-width: 100%;
@@ -437,14 +483,13 @@ export default {
 .box p{
   padding-right: 10px;
 }
+
 header{
   width: 100%;
-
   background: #17343f;
   margin-bottom: 30px;
   color: #fff;
   padding: 10px;
-
 }
 
 h1, h2 {
