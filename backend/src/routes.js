@@ -96,5 +96,33 @@ routes.get('/items', async(req, res) => {
     return res.json(items);
 })
 
+routes.post('/imagemxitem', async(req, res) => {
+    const { description, x, y, color, imagem_id } = req.body;
+
+    const data = {
+        description, x, y, color, imagem_id
+    }
+    
+    const result = await connection('imagemxitem').insert({
+        description,
+        x,
+        y,
+        color,
+        imagem_id
+    })
+
+    return res.json(result)
+
+})
+
+routes.get('/imagemxitem', async(req, res) => {
+    
+    const result = await connection('imagemxitem')
+    .select('*');
+
+    return res.json(result)
+
+})
+
 
 module.exports = routes;
