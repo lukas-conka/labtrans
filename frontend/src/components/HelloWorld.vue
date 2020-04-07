@@ -8,7 +8,7 @@
     <div class="menu">
             <div class="box">
               <span class="flag flag1">1</span>
-              <p>Insira ou busque <br>uma nova imagem<br>( passo 2 )</p>
+              <p>Insira ou busque <br>uma nova imagem<br></p><br>
               
                 <form enctype="multipart/form-data">
                     <label class="fileContainer">
@@ -245,10 +245,15 @@ export default {
 
     async search(){
 
+ 
+
+            carregando.innerHTML = `<p style="color:green"> Buscando... caso demore muito atualize a página.</p>`;
+        
+
       try{
         const next = await api.get('/next');
 
-        console.log(next.data)
+       
 
         this.imagem_id = next.data.id;
 
@@ -261,15 +266,24 @@ export default {
         document.getElementById("canvas").style.display = "none";
         
         this.items = [];
+        carregando.innerHTML = "";
 
 
+      if(next.data.error ){
+
+          carregando.innerHTML = `<p style="color:green">` + next.data.error + `</p>`;
+        }
 
       }catch(err){
         console.log(err)
+                  carregando.innerHTML = `<p style="color:green">` + err + `</p>`;
+
       }
 
     },
     async onAnalyze(){
+
+      
 
       const carregando = document.querySelector('#carregando');
 
@@ -286,6 +300,8 @@ export default {
           carregando.innerHTML = 'Imagem analisada. <br/> Valide os items abaixo, você também pode alterar o nome do item.';
           
 
+        }).catch(err => {
+            carregando.innerHTML = 'Erro! Busque uma imagem para analisar.';
         })
       },
       onFileChanged(e) {
@@ -294,12 +310,15 @@ export default {
       },
 
       async onUpload(e) {
+
+        e.preventDefault()
        const formData = new FormData();
        
         formData.append('file', this.selectedFile)
         formData.append('name', this.selectedFile.name)
         formData.append('processed', 0)
         formData.append('path', this.selectedFile.name)
+
 
         try{
           alert('Imagem cadastrada com sucesso. Agora clique em Buscar Imagem.')

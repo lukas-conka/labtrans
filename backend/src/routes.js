@@ -15,12 +15,26 @@ const storage = multer.diskStorage({
 
 const upload = multer({storage})
 
+/**
+* @swagger
+* /imagens:
+*   get:
+*     responses: 
+*       200:
+*         description: Receive back flavor and flavor Id.
+*/
+
+
+
 routes.get('/imagens', async(req, res) => {
 
     const imagens = await connection('images').select('*');
 
     return res.json(imagens);
 })
+
+
+
 
 routes.post('/imagens', upload.single("file"), async (req, res) => {
     const {name, processed, path} = req.body;
