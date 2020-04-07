@@ -20,5 +20,9 @@ Porem ja vão estar executadas.
 
 - Para identificaçao de items em imagens estou utilizando o TensorFlow JS.
 
+**** OBSERVAÇOES ****
+
+Qualquer dúvida pra instalação por favor me contactar, estou apto também a guiar atráves de uma apresentação da aplicação.
+
 
 
